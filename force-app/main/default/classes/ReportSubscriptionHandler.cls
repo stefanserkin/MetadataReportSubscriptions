@@ -9,6 +9,9 @@ public with sharing class ReportSubscriptionHandler {
     private static final String CONTENT_TYPE_EXCEL = 'application/vnd.ms-excel';
     private static final String ERROR_INVALID_TYPE = 'Must provide a valid file type (csv, xls, or xlsx)';
 
+    private static final String SUBSCRIPTION_TYPE_METADATA = 'Metadata Relationships';
+    private static final String SUBSCRIPTION_TYPE_SOQL = 'SOQL Query';
+
     /**
      * @Description emailData - async method emails a report as an attachment to a group of users
      * @param String reportName - the name of the report
@@ -29,7 +32,12 @@ public with sharing class ReportSubscriptionHandler {
         String fileType
     ) {
         // Get report from provided name
-        Report report = [SELECT Id, Name, DeveloperName FROM Report WHERE Name = :reportName OR DeveloperName = :reportName LIMIT 1];
+        Report report = [
+            SELECT Id, Name, DeveloperName 
+              FROM Report 
+             WHERE Name = :reportName OR DeveloperName = :reportName 
+             LIMIT 1
+        ];
         
         // Create attachment
         Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
@@ -83,8 +91,18 @@ public with sharing class ReportSubscriptionHandler {
     public static void emailData(
         List<Report_Subscription__mdt> lstSubs
     ) {
-        Set<String> setFieldNames = new Set<String>();
+        List<Report_Subscription__mdt> lstMetadataSubs = new List<Report_Subscription__mdt>();
+        // Separate subscriptions by type
         for (Report_Subscription__mdt sub : lstSubs) {
+            if (sub.Type__c == SUBSCRIPTION_TYPE_METADATA) {
+                lstMetadataSubs.add(sub);
+            } else if (sub.Type__c == SUBSCRIPTION_TYPE_SOQL) {
+                emailSoqlData(sub);
+            }
+        }
+
+        Set<String> setFieldNames = new Set<String>();
+        for (Report_Subscription__mdt sub : lstMetadataSubs) {
             setFieldNames.add(sub.Column_1__c);
             setFieldNames.add(sub.Column_2__c);
             setFieldNames.add(sub.Column_3__c);
@@ -101,7 +119,7 @@ public with sharing class ReportSubscriptionHandler {
             mapFieldToApiName.put(fieldDef.DurableId, fieldDef.QualifiedApiName);
         }
 
-        for (Report_Subscription__mdt sub : lstSubs) {
+        for (Report_Subscription__mdt sub : lstMetadataSubs) {
             String queryString = 'SELECT ';
             String header = '';
             header += sub.Column_1__c != null ? mapFieldToApiName.get(sub.Column_1__c) + ',' : '';
@@ -124,31 +142,88 @@ public with sharing class ReportSubscriptionHandler {
                 finalstr = finalstr + recordString;
             }
 
-            // Create csv email attachment
-            Messaging.EmailFileAttachment csvAttc = new Messaging.EmailFileAttachment();
-            Blob csvBlob = Blob.valueOf(finalstr);
-            String csvName = 'MetadataReportSubscription.csv';
-            csvAttc.setFileName(csvName);
-            csvAttc.setBody(csvBlob);
-
-            // Email result as attachment
-            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-            String[] toAddresses = new list<String> { 
-                'sserkin@asphaltgreen.org', 'stefanserkin+mdtreports@gmail.com'
-            };
-            String subject ='Metadata Report Subscription CSV';
-            email.setSubject(subject);
-            email.setToAddresses(toAddresses);
-            email.setPlainTextBody('Metadata Report Subscription CSV ');
-            email.setFileAttachments(new List<Messaging.EmailFileAttachment>{ 
-                csvAttc 
-            });
-            Messaging.SendEmailResult[] r = Messaging.sendEmail(new Messaging.SingleEmailMessage[] {email});
+            sendEmailFromCsvString(
+                finalstr, 
+                sub
+            );
 
         }
+    }
+
+    /**
+     * @description emailSoqlData - for metadata records with defined queries
+     * @param String headersCsv - a csv string of column headers
+     * @param String fieldApiNamesCsv - a csv string of field api names - must match headers
+     * @param String query - the soql query with records to retrieve
+     */
+
+    public static void emailSoqlData(
+        Report_Subscription__mdt sub
+    ) {
+        List<sObject> lstSObjects = Database.query(sub.SOQL_Query__c);
+        List<String> lstFieldApiNames = sub.Field_API_Names_CSV__c.split(',');
+
+        Integer rowListSize = 0; // lstSObjects.size();
+        Integer headerSize = sub.Headers_CSV__c.split(',').size();
+
+        // Begin csv string with row of headers
+        String resultCsv = sub.Headers_CSV__c + '\n';
+
+        // Add each row from query results
+        Integer recordCount = 0;
+        for (SObject sObj : lstSObjects) {
+            Map<String, Object> mapObjFields = (Map<String, Object>)JSON.deserializeUntyped(JSON.serialize(sObj));
+            Integer fieldCount = 0;
+            for (String field : lstFieldApiNames) {
+                resultCsv += mapObjFields.get(field) != null ? String.valueOf(mapObjFields.get(field)) : '';
+                fieldCount++;
+                resultCsv += fieldCount != headerSize ? ',' : '';
+            }
+            recordCount++;
+            resultCsv += recordCount != rowListSize ? '\n' : '';
+        }
+
+        sendEmailFromCsvString(
+            resultCsv, 
+            sub
+        );
 
     }
 
+    /**
+     * @description sendEmailFromCsvString - assembles email with attached csv and emails
+     *   it to provided to addresses
+     * @param String csvString - csv data to be included in attachment
+     * @param Report_Subscription__mdt sub - report subscription configuration
+     */
+
+    private static void sendEmailFromCsvString(
+        String csvString, 
+        Report_Subscription__mdt sub
+    ) {
+        // Create csv email file attachment
+        Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
+        attachment.setFileName(sub.Output_File_Name__c + '.csv');
+        attachment.setBody(Blob.valueOf(csvString));
+
+        // Email result as attachment
+        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+        email.setToAddresses(sub.To_Addresses__c.split(','));
+        email.setSubject(sub.Email_Subject__c);
+        email.setPlainTextBody(sub.Email_Body__c);
+        email.setFileAttachments(new List<Messaging.EmailFileAttachment>{ 
+            attachment 
+        });
+        List<Messaging.SendEmailResult> result = Messaging.sendEmail(
+            new List<Messaging.SingleEmailMessage> {
+                email
+            }
+        );
+    }
+
+    /**
+     * Custom exception
+     */
 
     public class ReportSubscriptionException extends Exception {}
 

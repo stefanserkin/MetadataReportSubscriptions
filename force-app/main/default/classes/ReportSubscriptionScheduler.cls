@@ -1,6 +1,6 @@
 public with sharing class ReportSubscriptionScheduler implements Schedulable {
 
-    public static String schedule = '0 30 0 ? * *'; // Every day at 12:30am
+    public static String schedule = '0 28 16 ? * *'; // Every day at 4:28pm
 
     public static String run() {
         ReportSubscriptionScheduler sched = new ReportSubscriptionScheduler();
