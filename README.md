@@ -1,18 +1,5 @@
-# Salesforce DX Project: Next Steps
+# Metadata Report Subscriptions
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+Expirementing with report subscriptions as custom metadata records, from a user-defined SOQL query or selection of entity definitions (a source object and included fields/columns). Scheduled apex then emails a csv based on the admin config.
 
-## How Do You Plan to Deploy Your Changes?
-
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
-
-## Configure Your Salesforce DX Project
-
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
-
-## Read All About It
-
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+The invocable apex allows the admin to email standard and custom reports as attachments from Flow Builder. Use Scheduled Flows to send daily, weekly, or a one-time scheduled report.
