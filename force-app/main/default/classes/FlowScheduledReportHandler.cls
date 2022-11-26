@@ -7,11 +7,12 @@ public with sharing class FlowScheduledReportHandler {
     public static List<Result> emailReport(List<Request> lstRequests) {
         String responseMessage = '';
 
-        String reportName = lstRequests.get(0).reportName != null ? lstRequests.get(0).reportName : null;
-        String toAddresses = lstRequests.get(0).toAddresses != null ? lstRequests.get(0).toAddresses : null;
-        String subject = lstRequests.get(0).subject != null ? lstRequests.get(0).subject : null;
-        String body = lstRequests.get(0).body != null ? lstRequests.get(0).body : null;
-        String senderDisplayName = lstRequests.get(0).senderDisplayName != null ? lstRequests.get(0).senderDisplayName : null;
+        String reportName = lstRequests.get(0).reportName;
+        String toAddresses = lstRequests.get(0).toAddresses;
+        String subject = lstRequests.get(0).subject;
+        String body = lstRequests.get(0).body;
+        String senderDisplayName = lstRequests.get(0).senderDisplayName;
+        String fileType = lstRequests.get(0).fileType.toLowerCase();
 
         try {
             ReportSubscriptionHandler.emailData(
@@ -19,7 +20,8 @@ public with sharing class FlowScheduledReportHandler {
                 toAddresses, 
                 subject, 
                 body, 
-                senderDisplayName
+                senderDisplayName, 
+                fileType
             );
             responseMessage = 'Success';
         } catch (Exception e) {
@@ -47,6 +49,9 @@ public with sharing class FlowScheduledReportHandler {
 
         @InvocableVariable(required=true label='Sender Display Name')
         public String senderDisplayName;
+
+        @InvocableVariable(required=true label='File Type' description='Valid values are csv, xls, and xlsx')
+        public string fileType;
     }
 
     public class Result {

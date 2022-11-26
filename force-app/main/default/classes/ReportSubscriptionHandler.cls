@@ -2,9 +2,81 @@ public with sharing class ReportSubscriptionHandler {
 
     private static Map<Id, Report> mapCachedReports;
 
+    private static final String FILE_TYPE_CSV = 'csv';
+    private static final String FILE_TYPE_EXCEL = 'xls';
+    private static final String FILE_TYPE_EXCEL_WORKBOOK = 'xlsx';
+    private static final String CONTENT_TYPE_CSV = 'text/csv';
+    private static final String CONTENT_TYPE_EXCEL = 'application/vnd.ms-excel';
+    private static final String ERROR_INVALID_TYPE = 'Must provide a valid file type (csv, xls, or xlsx)';
+
     /**
-     * @Description emailData - method sends csv as email attachment from 
-     *   report subscription metadata
+     * @Description emailData - async method emails a report as an attachment to a group of users
+     * @param String reportName - the name of the report
+     * @param String toAddresses - the recipients of the email
+     * @param String subject - the subject of the email message
+     * @param String body - the plain text body of the email message
+     * @param String displayName - display name for sender
+     * @param String contentType - valid values: ['csv','xls','xlsx'];
+     */
+
+    @future(callout=true)
+    public static void emailData(
+        String reportName, 
+        String toAddresses, 
+        String subject, 
+        String body, 
+        String senderDisplayName, 
+        String fileType
+    ) {
+        // Get report from provided name
+        Report report = [SELECT Id, Name, DeveloperName FROM Report WHERE Name = :reportName OR DeveloperName = :reportName LIMIT 1];
+        
+        // Create attachment
+        Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
+        ApexPages.PageReference objPage;
+
+        if (fileType.toLowerCase() == FILE_TYPE_CSV) {
+            // For csv files, specify encoding in relative url
+            objPage = new ApexPages.PageReference('/' + report.Id + '?csv=1&exp=1&enc=UTF-8&isdtp=p1');
+        } else if (
+            fileType.toLowerCase() == FILE_TYPE_EXCEL || 
+            fileType.toLowerCase() == FILE_TYPE_EXCEL_WORKBOOK
+        ) {
+            // For xls and xlsx, get report content using java servlet 
+            String instanceName = URL.getSalesforceBaseUrl().toExternalForm();
+            String url = instanceName + '/servlet/PrintableViewDownloadServlet?isdtp=p1&reportId=' + report.Id;
+            objPage = new ApexPages.PageReference(url);
+        } else {
+            throw new ReportSubscriptionException(ERROR_INVALID_TYPE);
+        }
+
+        attachment.setBody(objPage.getContent());
+        attachment.setFileName(report.DeveloperName + '.' + fileType.toLowerCase());
+        attachment.setContentType(fileType.toLowerCase().left(3) == FILE_TYPE_EXCEL ? CONTENT_TYPE_EXCEL : CONTENT_TYPE_CSV);
+
+        // Create email from input
+        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+        List<String> lstToAddresses = toAddresses.split(',');
+        email.setToAddresses(lstToAddresses);
+        email.setSubject(subject);
+        email.setPlainTextBody(body);
+        email.setSenderDisplayName(senderDisplayName);
+        email.setFileAttachments(
+            new List<Messaging.EmailFileAttachment>{ 
+                attachment 
+            }
+        );
+
+        // Send email
+        Messaging.SendEmailResult[] r = Messaging.sendEmail(
+            new List<Messaging.SingleEmailMessage>{
+                email
+            }
+        );
+    }
+
+    /**
+     * @Description emailData - sends csv as email attachment based on report subscription metadata
      * @param Report_Subscription__mdt[] lstSubs - a list of report subscription metadata records
      */
 
@@ -77,60 +149,7 @@ public with sharing class ReportSubscriptionHandler {
 
     }
 
-    /**
-     * @Description emailData - method also accepts a report name to email the report
-     *   as an attachment
-     * @param String reportName - the name of the report
-     * @param String toAddresses - the recipients of the email
-     * @param String subject - the subject of the email message
-     * @param String body - the plain text body of the email message
-     * @param String displayName - display name for sender
-     */
 
-    @future(callout=true)
-    public static void emailData(
-        String reportName, 
-        String toAddresses, 
-        String subject, 
-        String body, 
-        String senderDisplayName
-    ) {
-        // Get report from provided name
-        Report report = [SELECT Id, Name FROM Report WHERE Name = :reportName OR DeveloperName = :reportName LIMIT 1];
-        String reportId = report != null ? report.Id : null;
-        String reportDisplayName = report != null ? report.Name : null;
-
-        // Get report content using java servlet
-        String instanceName = URL.getSalesforceBaseUrl().toExternalForm();
-        String url = instanceName + '/servlet/PrintableViewDownloadServlet?isdtp=p1&reportId=' + reportId;
-        ApexPages.PageReference objPage = new ApexPages.PageReference(url);
-        Blob reportContent = objPage.getContent();
-
-        // Create attachment
-        Messaging.EmailFileAttachment objMsgEmailAttach = new Messaging.EmailFileAttachment();
-        objMsgEmailAttach.setFileName(reportDisplayName + '.csv');
-        objMsgEmailAttach.setBody(reportContent);
-        objMsgEmailAttach.setContentType('text/csv');
-
-        // Create email from input
-        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-        List<String> lstToAddresses = toAddresses.split(',');
-        email.setToAddresses(lstToAddresses);
-        email.setSubject(subject);
-        email.setPlainTextBody(body);
-        email.setSenderDisplayName(senderDisplayName);
-        email.setFileAttachments(
-            new List<Messaging.EmailFileAttachment>{ 
-                objMsgEmailAttach 
-            }
-        );
-
-        // Send email
-        Messaging.SendEmailResult[] r = Messaging.sendEmail(
-            new List<Messaging.SingleEmailMessage>{
-                email
-            }
-        );
-    }
+    public class ReportSubscriptionException extends Exception {}
 
 }
