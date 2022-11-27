@@ -1,7 +1,7 @@
-public with sharing class ReportSubscriptionBatch implements Database.Batchable<sObject> {
+public with sharing class ReportSubscriptionBatch implements Database.Batchable<sObject>, Database.AllowsCallouts {
     
     public Database.QueryLocator start(Database.BatchableContext bc) {
-        String query = 'SELECT Id, Type__c, To_Addresses__c, Email_Subject__c, Email_Body__c, Output_File_Name__c, Source_Object__c, Column_1__c, Column_2__c, Column_3__c, Column_4__c, Filter_Criteria__c, SOQL_Query__c, Headers_CSV__c, Field_API_Names_CSV__c FROM Report_Subscription__mdt LIMIT 10000';
+        String query = 'SELECT Id, Active__c, Type__c, Frequency__c, To_Addresses__c, Email_Subject__c, Email_Body__c, Output_File_Name__c, Source_Object__c, Column_1__c, Column_2__c, Column_3__c, Column_4__c, Filter_Criteria__c, SOQL_Query__c, Headers_CSV__c, Field_API_Names_CSV__c, Report_Name__c, Report_Format__c, Sender_Display_Name__c FROM Report_Subscription__mdt WHERE Active__c = true LIMIT 10000';
         return Database.getQueryLocator(query);
     }
 

@@ -1,6 +1,6 @@
 public with sharing class ReportSubscriptionScheduler implements Schedulable {
 
-    public static String schedule = '0 28 16 ? * *'; // Every day at 4:28pm
+    public static String schedule = '0 15 5 ? * *'; // Every day at 5:15am
 
     public static String run() {
         ReportSubscriptionScheduler sched = new ReportSubscriptionScheduler();
@@ -9,7 +9,7 @@ public with sharing class ReportSubscriptionScheduler implements Schedulable {
 
     public void execute(SchedulableContext context) {
         ReportSubscriptionBatch batch = new ReportSubscriptionBatch();
-        Id batchId = Database.executeBatch(batch, 50);
+        Id batchId = Database.executeBatch(batch, 1);
     }
     
 }
