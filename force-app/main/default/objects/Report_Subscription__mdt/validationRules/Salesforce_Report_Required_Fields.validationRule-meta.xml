@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Salesforce_Report_Required_Fields</fullName>
+    <active>true</active>
+    <description>Enforces required fields for Salesforce Report subscriptions</description>
+    <errorConditionFormula>AND( 
+  ISPICKVAL( Type__c, &quot;Salesforce Report&quot; ), 
+  OR(
+    ISBLANK( Report_Name__c ), 
+    ISBLANK( TEXT( Report_Format__c ) )
+  )
+)</errorConditionFormula>
+    <errorMessage>Salesforce Report subscriptions must contain a report name and format</errorMessage>
+</ValidationRule>

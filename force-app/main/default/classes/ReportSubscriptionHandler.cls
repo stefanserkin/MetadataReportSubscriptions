@@ -2,29 +2,29 @@ public with sharing class ReportSubscriptionHandler {
 
     private static Map<Id, Report> mapCachedReports;
     private static List<Messaging.SingleEmailMessage> lstEmails;
-
+    // File and content types
     private static final String FILE_TYPE_CSV = 'csv';
     private static final String FILE_TYPE_EXCEL = 'xls';
     private static final String FILE_TYPE_EXCEL_WORKBOOK = 'xlsx';
     private static final String CONTENT_TYPE_CSV = 'text/csv';
     private static final String CONTENT_TYPE_EXCEL = 'application/vnd.ms-excel';
     private static final String ERROR_INVALID_TYPE = 'Must provide a valid file type (csv, xls, or xlsx)';
-
+    // Metadata record types
     private static final String SUBSCRIPTION_TYPE_METADATA = 'Metadata Relationship';
     private static final String SUBSCRIPTION_TYPE_SOQL = 'SOQL Query';
     private static final String SUBSCRIPTION_TYPE_REPORT = 'Salesforce Report';
-
+    // Formats and extensions for Salesforce reports
     private static final String REPORT_FORMAT_DETAILS = 'Details Only';
     private static final String REPORT_FORMAT_FORMATTED = 'Formatted Report';
 
     /**
-     * @Description emailData - async method emails a report as an attachment to a group of users
-     * @param String reportName - the name of the report
-     * @param String toAddresses - the recipients of the email
-     * @param String subject - the subject of the email message
-     * @param String body - the plain text body of the email message
-     * @param String displayName - display name for sender
-     * @param String fileType - valid values: ['csv','xls','xlsx'];
+     * @Description emailData - Async method emails a report as an attachment to a group of users
+     * @param String reportName - The name of the report
+     * @param String toAddresses - The recipients of the email
+     * @param String subject - The subject of the email message
+     * @param String body - The plain text body of the email message
+     * @param String displayName - Display name for sender
+     * @param String fileType - Valid values: ['csv','xls','xlsx'];
      */
 
     @future(callout=true)
@@ -89,8 +89,8 @@ public with sharing class ReportSubscriptionHandler {
     }
 
     /**
-     * @Description emailData - sends csv as email attachment based on report subscription metadata
-     * @param Report_Subscription__mdt[] lstSubs - a list of report subscription metadata records
+     * @Description emailData - Sends csv as email attachment based on report subscription metadata
+     * @param Report_Subscription__mdt[] lstSubs - A list of report subscription metadata records
      */
 
     public static void emailData(
@@ -98,7 +98,7 @@ public with sharing class ReportSubscriptionHandler {
     ) {
         // Instantiate list of emails
         lstEmails = new List<Messaging.SingleEmailMessage>();
-        // Create list of metadata subs for later processing
+        // Create list of metadata subs that aren't kicked off to other methods for processing
         List<Report_Subscription__mdt> lstMetadataSubs = new List<Report_Subscription__mdt>();
 
         // Separate subscriptions by type
@@ -152,7 +152,7 @@ public with sharing class ReportSubscriptionHandler {
                 ' WHERE ' + sub.Filter_Criteria__c
             ;
 
-            // get data
+            // Get data
             List<sObject> lstSObjects = Database.query(queryString);
 
             String csvString = String.join(lstFieldApiNames, ', ') + '\n';
@@ -183,10 +183,10 @@ public with sharing class ReportSubscriptionHandler {
     }
 
     /**
-     * @description emailSoqlData - for metadata records with defined queries
-     * @param String headersCsv - a csv string of column headers
-     * @param String fieldApiNamesCsv - a csv string of field api names - must match headers
-     * @param String query - the soql query with records to retrieve
+     * @description emailSoqlData - For metadata records with defined queries
+     * @param String headersCsv - A csv string of column headers
+     * @param String fieldApiNamesCsv - A csv string of field api names - must match headers
+     * @param String query - The soql query with records to retrieve
      */
 
     private static void emailSoqlData(
@@ -195,7 +195,7 @@ public with sharing class ReportSubscriptionHandler {
         List<sObject> lstSObjects = Database.query(sub.SOQL_Query__c);
         List<String> lstFieldApiNames = sub.Field_API_Names_CSV__c.split(',');
 
-        Integer rowListSize = 0; // lstSObjects.size();
+        Integer rowListSize = 0;
         Integer headerSize = sub.Headers_CSV__c.split(',').size();
 
         // Begin csv string with row of headers
@@ -223,8 +223,8 @@ public with sharing class ReportSubscriptionHandler {
     }
 
     /**
-     * @description emailReportData - for metadata records sending Salesforce reports
-     * @param Report_Subscription__mdt sub - report subscription with Salesforce Report config
+     * @description emailReportData - For metadata records sending Salesforce reports
+     * @param Report_Subscription__mdt sub - Report subscription with Salesforce Report config
      */
 
     private static void emailReportData(
@@ -255,7 +255,7 @@ public with sharing class ReportSubscriptionHandler {
             String url = instanceName + '/servlet/PrintableViewDownloadServlet?isdtp=p1&reportId=' + report.Id;
             objPage = new ApexPages.PageReference(url);
         } else {
-            // throw new ReportSubscriptionException(ERROR_INVALID_TYPE);
+            throw new ReportSubscriptionException(ERROR_INVALID_TYPE);
         }
 
         attachment.setBody(objPage.getContent());
@@ -281,11 +281,11 @@ public with sharing class ReportSubscriptionHandler {
     }
 
     /**
-     * @description sendEmailFromCsvString - assembles email with attached csv and emails
+     * @description sendEmailFromCsvString - Assembles email with attached csv and emails
      *   it to provided to addresses
      *   Not actually sending anything - adding to collection for bulk send
-     * @param String csvString - csv data to be included in attachment
-     * @param Report_Subscription__mdt sub - report subscription configuration
+     * @param String csvString - CSV data to be included in attachment
+     * @param Report_Subscription__mdt sub - Report subscription configuration
      */
 
     private static void sendEmailFromCsvString(
@@ -301,6 +301,7 @@ public with sharing class ReportSubscriptionHandler {
         Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
         email.setToAddresses(sub.To_Addresses__c.split(','));
         email.setSubject(sub.Email_Subject__c);
+        email.setSenderDisplayName(sub.Sender_Display_Name__c);
         email.setPlainTextBody(sub.Email_Body__c);
         email.setFileAttachments(new List<Messaging.EmailFileAttachment>{ 
             attachment 

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Contacts with Birthdays Today</label>
+    <protected>false</protected>
+    <values>
+        <field>Active__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Column_1__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Column_2__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Column_3__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Column_4__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Email_Body__c</field>
+        <value xsi:type="xsd:string">Hello, 
+
+The attached contacts have birthdays today. Don&apos;t forget to wish them a happy birthday!
+
+Best,
+The reporting team</value>
+    </values>
+    <values>
+        <field>Email_Subject__c</field>
+        <value xsi:type="xsd:string">Wish these folks a happy birthday!</value>
+    </values>
+    <values>
+        <field>Field_API_Names_CSV__c</field>
+        <value xsi:type="xsd:string">FirstName,LastName,Title,Email,Phone,Birthdate</value>
+    </values>
+    <values>
+        <field>Filter_Criteria__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Frequency__c</field>
+        <value xsi:type="xsd:string">Daily</value>
+    </values>
+    <values>
+        <field>Headers_CSV__c</field>
+        <value xsi:type="xsd:string">First Name,Last Name,Position,Email,Phone Number,Date of Birth</value>
+    </values>
+    <values>
+        <field>Output_File_Name__c</field>
+        <value xsi:type="xsd:string">ContactsWithBirthdaysToday</value>
+    </values>
+    <values>
+        <field>Report_Format__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Report_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>SOQL_Query__c</field>
+        <value xsi:type="xsd:string">SELECT FirstName,LastName,Title,Email,Phone,Birthdate FROM Contact WHERE Birthdate = TODAY</value>
+    </values>
+    <values>
+        <field>Sender_Display_Name__c</field>
+        <value xsi:type="xsd:string">AG Data Team</value>
+    </values>
+    <values>
+        <field>Source_Object__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>To_Addresses__c</field>
+        <value xsi:type="xsd:string">sserkin@asphaltgreen.org,sheckytheshark+bdays@gmail.com,stefanserkin+bdays@gmail.com</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">SOQL Query</value>
+    </values>
+</CustomMetadata>

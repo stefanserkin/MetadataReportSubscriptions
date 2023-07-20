@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Report_Format__c</fullName>
+    <description>Choose Details Only to export only the detail rows. Use this to do further calculations or for uploading to other systems. Choose Formatted Report to export the report, including the report header, groupings, and filter settings.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Choose Details Only to export only the detail rows. Use this to do further calculations or for uploading to other systems. Choose Formatted Report to export the report, including the report header, groupings, and filter settings.</inlineHelpText>
+    <label>Report Format</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Details Only</fullName>
+                <default>true</default>
+                <label>Details Only</label>
+            </value>
+            <value>
+                <fullName>Formatted Report</fullName>
+                <default>false</default>
+                <label>Formatted Report</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

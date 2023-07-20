@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>New Contacts Daily Report</label>
+    <protected>false</protected>
+    <values>
+        <field>Active__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Column_1__c</field>
+        <value xsi:type="xsd:string">Name</value>
+    </values>
+    <values>
+        <field>Column_2__c</field>
+        <value xsi:type="xsd:string">AG_ID__c</value>
+    </values>
+    <values>
+        <field>Column_3__c</field>
+        <value xsi:type="xsd:string">Title</value>
+    </values>
+    <values>
+        <field>Column_4__c</field>
+        <value xsi:type="xsd:string">Email</value>
+    </values>
+    <values>
+        <field>Email_Body__c</field>
+        <value xsi:type="xsd:string">Check it out! The new contacts in our Salesforce org are in the attached file.</value>
+    </values>
+    <values>
+        <field>Email_Subject__c</field>
+        <value xsi:type="xsd:string">All new contacts in Salesforce</value>
+    </values>
+    <values>
+        <field>Field_API_Names_CSV__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Filter_Criteria__c</field>
+        <value xsi:type="xsd:string">CreatedDate = TODAY</value>
+    </values>
+    <values>
+        <field>Frequency__c</field>
+        <value xsi:type="xsd:string">Daily</value>
+    </values>
+    <values>
+        <field>Headers_CSV__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Output_File_Name__c</field>
+        <value xsi:type="xsd:string">newly_created_contacts</value>
+    </values>
+    <values>
+        <field>Report_Format__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Report_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>SOQL_Query__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Sender_Display_Name__c</field>
+        <value xsi:type="xsd:string">AG Reporting Hub</value>
+    </values>
+    <values>
+        <field>Source_Object__c</field>
+        <value xsi:type="xsd:string">Contact</value>
+    </values>
+    <values>
+        <field>To_Addresses__c</field>
+        <value xsi:type="xsd:string">sserkin@asphaltgreen.org,stefanserkin@gmail.com</value>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Metadata Relationship</value>
+    </values>
+</CustomMetadata>

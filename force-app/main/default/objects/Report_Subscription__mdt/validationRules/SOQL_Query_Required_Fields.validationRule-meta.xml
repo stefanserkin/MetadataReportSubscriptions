@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SOQL_Query_Required_Fields</fullName>
+    <active>true</active>
+    <description>Enforces required fields for SOQL Query subscriptions</description>
+    <errorConditionFormula>AND( 
+  ISPICKVAL( Type__c, &quot;SOQL Query&quot; ), 
+  OR(
+    ISBLANK( SOQL_Query__c ), 
+    ISBLANK( Headers_CSV__c ), 
+    ISBLANK( Field_API_Names_CSV__c )
+  )
+)</errorConditionFormula>
+    <errorMessage>SOQL Query subscriptions must contain a query, column headers, and the api names for each column</errorMessage>
+</ValidationRule>
